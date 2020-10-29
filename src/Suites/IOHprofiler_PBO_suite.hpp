@@ -31,6 +31,8 @@
 #include "f_ising_triangular.hpp"
 #include "f_MIS.hpp"
 #include "f_N_queens.hpp"
+#include "f_concatenated_trap.hpp"
+#include "f_nk_landscapes.hpp"
 
 #include "IOHprofiler_suite.h"
 
@@ -42,7 +44,7 @@ public:
     std::vector<int> problem_id;
     std::vector<int> instance_id;
     std::vector<int> dimension;
-    for (int i = 0; i < 23; ++i) {
+    for (int i = 0; i < 25; ++i) {
       problem_id.push_back(i+1);
     }
     for (int i = 0; i < 1; ++i) {
@@ -61,7 +63,7 @@ public:
 
   PBO_suite(std::vector<int> problem_id, std::vector<int> instance_id, std::vector<int> dimension) {
     for (size_t i = 0; i < problem_id.size(); ++i) {
-      if (problem_id[i] < 0 || problem_id[i] > 23) {
+      if (problem_id[i] < 0 || problem_id[i] > 25) {
         IOH_error("problem_id " + std::to_string(problem_id[i]) + " is not in PBO_suite");
       }
     }
@@ -116,6 +118,8 @@ public:
     registerInFactory<IOHprofiler_problem<int>,Ising_Ring> regIsing_Ring("Ising_Ring");
     registerInFactory<IOHprofiler_problem<int>,Ising_Torus> regIsing_Torus("Ising_Torus");
     registerInFactory<IOHprofiler_problem<int>,Ising_Triangular> regIsing_Triangular("Ising_Triangular");
+    registerInFactory<IOHprofiler_problem<int>,Concatenated_Trap> regConcatenated_Trap("Concatenated_Trap");
+    registerInFactory<IOHprofiler_problem<int>,NK_Landscapes> regNK_Landscapes("NK_Landscapes");
 
     mapIDTOName(1,"OneMax");
     mapIDTOName(2,"LeadingOnes");
@@ -140,6 +144,8 @@ public:
     mapIDTOName(20,"Ising_Torus");
     mapIDTOName(21,"Ising_Triangular");
     mapIDTOName(23,"NQueens");
+    mapIDTOName(24,"Concatenated_Trap");
+    mapIDTOName(25,"NK_Landscapes");
   }
 
   static PBO_suite * createInstance() {
