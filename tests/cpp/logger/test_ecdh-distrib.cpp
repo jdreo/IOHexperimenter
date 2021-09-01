@@ -1,6 +1,6 @@
 #include "../utils.hpp"
 
-#include "ioh/logger/eah.hpp"
+#include "ioh/logger/ecdh.hpp"
 #include "ioh/suite.hpp"
 
 template<class RR, class RV>
@@ -17,13 +17,13 @@ void do_test(std::string scale_errors, std::string scale_evals)
     RR r_error(0,6e7,buckets);
     RV r_evals(0,sample_size,buckets);
     
-    EAH eah(r_error, r_evals);
-    suite.attach_logger(eah);
+    ECDH ecdh(r_error, r_evals);
+    suite.attach_logger(ecdh);
 
     for (const auto& pb : suite) {
         for (size_t run = 0; run < runs; ++run) {
             // FIXME how to indicate different runs to the logger?
-             // eah.update_run_info(pb->meta_data());
+             // ecdh.update_run_info(pb->meta_data());
             for (size_t s = 0; s < sample_size; ++s) {
                 (*pb)(ioh::common::random::pbo::uniform(pb->meta_data().n_variables, 0));
             } // s
@@ -32,23 +32,23 @@ void do_test(std::string scale_errors, std::string scale_evals)
     } // pb
 
     CLUTCHCODE(progress,
-        auto d = eah::stat::distribution(eah);
+        auto d = ecdh::stat::distribution(ecdh);
         std::clog << scale_errors << "-" << scale_evals << " joint cumulative attainment distribution for errors and evaluations:" << std::endl;
-        std::clog << eah::colormap(d, {&r_error, &r_evals}, true) << std::endl;
-        // std::clog << eah::colormap(d, {&r_error, &r_evals}) << std::endl;
-        // std::clog << eah::colormap(d) << std::endl;
+        std::clog << ecdh::colormap(d, {&r_error, &r_evals}, true) << std::endl;
+        // std::clog << ecdh::colormap(d, {&r_error, &r_evals}) << std::endl;
+        // std::clog << ecdh::colormap(d) << std::endl;
         // 
-        auto h = eah::stat::histogram(eah);
+        auto h = ecdh::stat::histogram(ecdh);
         std::clog << scale_errors << "-" << scale_evals << " joint cumulative attainment histogram for errors and evaluations:" << std::endl;
-        std::clog << eah::colormap(h, {&r_error, &r_evals}, true) << std::endl;
-        // std::clog << eah::colormap(h, {&r_error, &r_evals}) << std::endl;
-        // std::clog << eah::colormap(h) << std::endl;
+        std::clog << ecdh::colormap(h, {&r_error, &r_evals}, true) << std::endl;
+        // std::clog << ecdh::colormap(h, {&r_error, &r_evals}) << std::endl;
+        // std::clog << ecdh::colormap(h) << std::endl;
     );
 }
 
-TEST_F(BaseTest, DISABLED_eah_plots)
+TEST_F(BaseTest, DISABLED_ecdh_plots)
 {
-    using namespace ioh::logger::eah;
+    using namespace ioh::logger::ecdh;
 
     do_test<LinearScale<double>, LinearScale<size_t>>("linear","linear");
     do_test<  Log2Scale<double>, LinearScale<size_t>>("log2"  ,"linear");

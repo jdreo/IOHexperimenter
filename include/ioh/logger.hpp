@@ -7,7 +7,7 @@
 #include "logger/store.hpp"
 #include "logger/flatfile.hpp"
 #include "logger/combine.hpp"
-#include "logger/eah.hpp"
+#include "logger/ecdh.hpp"
 #include "logger/eaf.hpp"
 #include "logger/analyzer.hpp"
 

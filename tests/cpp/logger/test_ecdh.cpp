@@ -1,9 +1,9 @@
 #include "../utils.hpp"
 
-#include "ioh/logger/eah.hpp"
+#include "ioh/logger/ecdh.hpp"
 #include "ioh/suite.hpp"
 
-TEST_F(BaseTest, eah_bbob)
+TEST_F(BaseTest, ecdh_bbob)
 {
     using namespace ioh::problem;
     using namespace ioh::logger;
@@ -11,7 +11,7 @@ TEST_F(BaseTest, eah_bbob)
     auto sample_size = 100;
 
     ioh::suite::BBOB suite({1, 2}, {1, 2}, {2, 10});
-    ioh::logger::EAH logger(0, 6e7, 20, 0, sample_size, 20);
+    ioh::logger::ECDH logger(0, 6e7, 20, 0, sample_size, 20);
 
     suite.attach_logger(logger);
 
@@ -24,7 +24,7 @@ TEST_F(BaseTest, eah_bbob)
             for (auto s = 0; s < sample_size; ++s)
                 (*p)(ioh::common::random::pbo::uniform(p->meta_data().n_variables, 0));
 
-            EXPECT_EQ(ioh::logger::eah::stat::sum(logger), attainments_sum.front());
+            EXPECT_EQ(ioh::logger::ecdh::stat::sum(logger), attainments_sum.front());
             p->reset();
             attainments_sum.pop_front();
         }

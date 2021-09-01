@@ -1,9 +1,9 @@
 #include "../utils.hpp"
 
-#include "ioh/logger/eah.hpp"
+#include "ioh/logger/ecdh.hpp"
 #include "ioh/suite.hpp"
 
-TEST_F(BaseTest, eah_stats)
+TEST_F(BaseTest, ecdh_stats)
 {
     using namespace ioh::logger;
 
@@ -14,13 +14,13 @@ TEST_F(BaseTest, eah_stats)
     size_t pb_start = 2;
     size_t pb_end = 10;
     ioh::suite::BBOB suite({ 1, 2 }, { 1, 2 }, { 2, 10 });
-    EAH eah(0, 6e7, buckets, 0, sample_size, buckets);
-    suite.attach_logger(eah);
+    ECDH ecdh(0, 6e7, buckets, 0, sample_size, buckets);
+    suite.attach_logger(ecdh);
 
     for (const auto& pb : suite) {
         for (size_t run = 0; run < runs; ++run) {
             // FIXME how to indicate different runs to the logger?
-            // eah.update_run_info(pb->meta_data());
+            // ecdh.update_run_info(pb->meta_data());
             for (size_t s = 0; s < sample_size; ++s) {
                 (*pb)(ioh::common::random::pbo::uniform(pb->meta_data().n_variables, 0));
             } // s
@@ -28,11 +28,11 @@ TEST_F(BaseTest, eah_stats)
         } // run
     } // pb
 
-    EXPECT_GT(eah::stat::sum(eah), 0);
+    EXPECT_GT(ecdh::stat::sum(ecdh), 0);
 
     // Histogram
-    eah::stat::Histogram histo;
-    eah::stat::Histogram::Mat m = histo(eah);
+    ecdh::stat::Histogram histo;
+    ecdh::stat::Histogram::Mat m = histo(ecdh);
     EXPECT_EQ(histo.nb_attainments(), runs * (pb_end - pb_start));
     
     // buckets * buckets matrix
@@ -41,10 +41,10 @@ TEST_F(BaseTest, eah_stats)
         EXPECT_EQ(row.size(), buckets);
     }
 
-    EXPECT_EQ(eah::stat::histogram(eah), m);
+    EXPECT_EQ(ecdh::stat::histogram(ecdh), m);
     
     // Distribution
-    eah::stat::Distribution::Mat d = eah::stat::distribution(eah);
+    ecdh::stat::Distribution::Mat d = ecdh::stat::distribution(ecdh);
     
     // buckets * buckets matrix
     EXPECT_EQ(d.size(), buckets);
@@ -53,6 +53,6 @@ TEST_F(BaseTest, eah_stats)
     }
 
     // Volume under curve
-    EXPECT_GE(eah::stat::under_curve::volume(eah), 0);
-    EXPECT_LE(eah::stat::under_curve::volume(eah), 1);
+    EXPECT_GE(ecdh::stat::under_curve::volume(ecdh), 0);
+    EXPECT_LE(ecdh::stat::under_curve::volume(ecdh), 1);
 }

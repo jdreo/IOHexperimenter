@@ -34,15 +34,15 @@ void fail(const Error error, const std::string& msg = "")
 {
     std::cerr << "ERROR: " << msg << std::endl;
     std::cerr << "Usage: eafh <samples> <runs> <type> [buckets scale]" << std::endl;
-    std::cerr << "\ttype = 'EAH' or 'EAF' (the default)" << std::endl;
-    std::cerr << "\tscale (only for EAH) = 'log2', 'log10' or 'linear'" << std::endl;
-    std::cerr << "\tbuckets (only for EAH) = number of buckets" << std::endl;
+    std::cerr << "\ttype = 'ECDH' or 'EAF' (the default)" << std::endl;
+    std::cerr << "\tscale (only for ECDH) = 'log2', 'log10' or 'linear'" << std::endl;
+    std::cerr << "\tbuckets (only for ECDH) = number of buckets" << std::endl;
     exit(error);
 }
 
 int main(int argc, char** argv)
 {
-    auto m = common::OptimizationType::Minimization;
+    // auto m = common::OptimizationType::Minimization;
 
     if(argc < 4) { fail(not_enough_args, "Not enough arguments"); }
 
@@ -64,35 +64,35 @@ int main(int argc, char** argv)
         run(logger, samples, runs);
         std::cout << logger::eaf::stat::volume(logger, 0, bbob_max, 0, samples, runs) << std::endl;
 
-    } else if(type == "EAH") {
+    } else if(type == "ECDH") {
         if(argc != 6) { fail(wrong_number_of_args, "EAF type should come with 5 arguments"); }
         
         size_t buckets = std::atoi(argv[4]);
 
         std::string scale(argv[5]);
         if(scale == "linear") {
-            std::clog << "EAH: samples=" << samples << ", runs=" << runs << ", buckets=" << buckets << ", scale=" << scale << std::endl;
-            logger::eah::LinearScale<double> sv(0,bbob_max,buckets);
-            logger::eah::LinearScale<size_t> st(0,samples,buckets);
-            logger::EAH logger(sv, st);
+            std::clog << "ECDH: samples=" << samples << ", runs=" << runs << ", buckets=" << buckets << ", scale=" << scale << std::endl;
+            logger::ecdh::LinearScale<double> sv(0,bbob_max,buckets);
+            logger::ecdh::LinearScale<size_t> st(0,samples,buckets);
+            logger::ECDH logger(sv, st);
             run(logger, samples, runs);
-            std::cout << logger::eah::stat::under_curve::volume(logger) << std::endl;
+            std::cout << logger::ecdh::stat::under_curve::volume(logger) << std::endl;
 
         } else if(scale == "log2"){
-            std::clog << "EAH: samples=" << samples << ", runs=" << runs << ", buckets=" << buckets << ", scale=" << scale << std::endl;
-            logger::eah::Log2Scale<double> sv(0,bbob_max,buckets);
-            logger::eah::Log2Scale<size_t> st(0,samples,buckets);
-            logger::EAH logger(sv, st);
+            std::clog << "ECDH: samples=" << samples << ", runs=" << runs << ", buckets=" << buckets << ", scale=" << scale << std::endl;
+            logger::ecdh::Log2Scale<double> sv(0,bbob_max,buckets);
+            logger::ecdh::Log2Scale<size_t> st(0,samples,buckets);
+            logger::ECDH logger(sv, st);
             run(logger, samples, runs);
-            std::cout << logger::eah::stat::under_curve::volume(logger) << std::endl;
+            std::cout << logger::ecdh::stat::under_curve::volume(logger) << std::endl;
 
         } else if(scale == "log10"){
-            std::clog << "EAH: samples=" << samples << ", runs=" << runs << ", buckets=" << buckets << ", scale=" << scale << std::endl;
-            logger::eah::Log10Scale<double> sv(0,bbob_max,buckets);
-            logger::eah::Log10Scale<size_t> st(0,samples,buckets);
-            logger::EAH logger(sv, st);
+            std::clog << "ECDH: samples=" << samples << ", runs=" << runs << ", buckets=" << buckets << ", scale=" << scale << std::endl;
+            logger::ecdh::Log10Scale<double> sv(0,bbob_max,buckets);
+            logger::ecdh::Log10Scale<size_t> st(0,samples,buckets);
+            logger::ECDH logger(sv, st);
             run(logger, samples, runs);
-            std::cout << logger::eah::stat::under_curve::volume(logger) << std::endl;
+            std::cout << logger::ecdh::stat::under_curve::volume(logger) << std::endl;
 
         } else {
             std::ostringstream msg;

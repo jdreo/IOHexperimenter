@@ -9,17 +9,17 @@ namespace ioh
 {
     namespace logger
     {
-        /** Implementation details of the logger::EAH class. */
-        namespace eah
+        /** Implementation details of the logger::ECDH class. */
+        namespace ecdh
         {
-            /** @defgroup EAH Empirical Attainment Histogram
-             * Features related to the EAH logger.
+            /** @defgroup ECDH Empirical Cumulative Distribution Histogram
+             * Features related to the ECDH logger.
              * 
              * @ingroup Loggers
              */
 
-            /** @defgroup EAH_API EAH API
-             * API related to the EAH logger.
+            /** @defgroup ECDH_API ECDH API
+             * API related to the ECDH logger.
              * 
              * @ingroup Logging
              */
@@ -36,9 +36,9 @@ namespace ioh
              *          this uses a closed [min,max] interval for the "origin" values.
              *          So that any value at `max` will be assigned to the `size-1`th bucket.
              *
-             * Used in EAH.
+             * Used in ECDH.
              * 
-             * @ingroup EAH_API
+             * @ingroup ECDH_API
              */
             // Why a closed interval? Because it's more natural for the user to indicates the number of evaluations that way.
             template <class R>
@@ -105,7 +105,7 @@ namespace ioh
             };
 
             /** Linear scale.
-             * @ingroup EAH
+             * @ingroup ECDH
              */
             template <class R>
             class LinearScale : public Scale<R>
@@ -165,7 +165,7 @@ namespace ioh
              * @warning This implementation is not very robust to rounding errors
              *          especially if you use the bounds method with large lengths.
              * 
-             * @ingroup EAH
+             * @ingroup ECDH
              */
             template <class R>
             class Log2Scale : public Scale<R>
@@ -240,7 +240,7 @@ namespace ioh
              * @warning This implementation is not very robust to rounding errors
              *          especially if you use the bounds method with large lengths.
              * 
-             * @ingroup EAH
+             * @ingroup ECDH
              */
             template <class R>
             class Log10Scale : public Scale<R>
@@ -323,7 +323,7 @@ namespace ioh
              * instead of the faster vector of char.
              * During our tests, using char was 1.02 times faster, while consuming 1.4 more memory.
              * 
-             * @ingroup EAH_API
+             * @ingroup ECDH_API
              */
             using AttainmentMatrix = std::vector< // error targets
                 std::vector< // function evaluations
@@ -331,7 +331,7 @@ namespace ioh
 
             /** Pretty print an AttainmentMatrix.
              *
-             * @ingroup EAH
+             * @ingroup ECDH
              */
             inline std::ostream &operator<<(std::ostream &out,
                                             const AttainmentMatrix &mat)
@@ -350,7 +350,7 @@ namespace ioh
                 return out;
             }
 
-            /** Type used to store all bi-dimensional attainment functions.
+            /** Type used to store all bi-dimensional attainment matrices.
              *
              * First  dimension is the problem id,
              * second dimension is the dimension id,
@@ -358,14 +358,14 @@ namespace ioh
              * fourth dimension is the run id.
              * Every item is an AttainmentMatrix.
              * 
-             * @ingroup EAH_API
+             * @ingroup ECDH_API
              */
             using AttainmentSuite = std::map<size_t, // problem // FIXME add a Suite level.
                                              std::map<size_t, // dim
                                                       std::map<size_t, // instance
                                                                std::map<size_t, // runs
                                                                         AttainmentMatrix>>>>;
-        } // eah
+        } // ecdh
 
         /** A logger that stores bi-dimensional error/evaluations discretized attainment matrices.
          *
@@ -385,7 +385,7 @@ namespace ioh
             unsigned int sample_size = 100;
             unsigned int buckets = 20;
             ioh::suite::BBOB suite({1, 2}, {1, 2}, {2, 10});
-            ioh::logger::EAH logger(0, 6e7, buckets, 0, sample_size, buckets);
+            ioh::logger::ECDH logger(0, 6e7, buckets, 0, sample_size, buckets);
             suite.attach_logger(logger);
             for (const auto &p : suite) {
                 for (auto r = 0; r < 2; r++) {
@@ -398,12 +398,12 @@ namespace ioh
          * @endcode
          *
          * @note If you use as many buckets as there is evaluations of the objective function,
-         *       you will essentially computes as many ERT-EAH as there is targets.
+         *       you will essentially computes as many ERT-ECDH as there is targets.
          * 
          * @ingroup Loggers
-         * @ingroup EAH
+         * @ingroup ECDH
          */
-        class EAH : public Logger
+        class ECDH : public Logger
         {
         protected:
             /** Internal types  @{ */
@@ -426,7 +426,7 @@ namespace ioh
         public:
             /** Simple constructor that defaults to log-log scale.
              */
-            EAH(
+            ECDH(
                 const double error_min, const double error_max,
                 const size_t error_buckets,
                 const size_t evals_min, const size_t evals_max,
@@ -452,9 +452,9 @@ namespace ioh
              *
              * @see ScaleLinear
              */
-            EAH(
-                eah::Scale<double> &error_buckets,
-                eah::Scale<size_t> &evals_buckets) :
+            ECDH(
+                ecdh::Scale<double> &error_buckets,
+                ecdh::Scale<size_t> &evals_buckets) :
                 Logger()
                 , _default_range_error(0, 1, 1)
                 , _default_range_evals(0, 1, 1)
@@ -489,7 +489,7 @@ namespace ioh
                 _current.ins = problem.instance;
                 _current.max_min = problem.optimization_type;
                 _current.is_tracked = false;
-                _current.run = 1 + static_cast<int>(_eah_suite[static_cast<int>(_current.pb)][static_cast<int>(_current.
+                _current.run = 1 + static_cast<int>(_ecdh_suite[static_cast<int>(_current.pb)][static_cast<int>(_current.
                     dim)][static_cast<int>(_current.ins)].size());
             }
 
@@ -504,14 +504,14 @@ namespace ioh
                         optimum.y != -std::numeric_limits<double>::infinity());
                     if (_current.has_opt)
                     {
-                        IOH_DBG(debug, "Problem has known optimum, will compute the EAH of the error.")
+                        IOH_DBG(debug, "Problem has known optimum, will compute the ECDH of the error.")
                         _current.opt = log_info.optimum.y;
                     }
                     else
                     {
-                        IOH_DBG(debug, "Problem has no known optimum, will compute the absolute EAH.")
+                        IOH_DBG(debug, "Problem has no known optimum, will compute the absolute ECDH.")
                     }
-                    init_eah(_current);
+                    init_ecdh(_current);
                 }
 
                 // Access the properties that were instantiated in the constructor.
@@ -566,9 +566,9 @@ namespace ioh
             /** Accessors @{ */
 
             /** Access all the data computed by this observer. */
-            [[nodiscard]] const eah::AttainmentSuite &data() const
+            [[nodiscard]] const ecdh::AttainmentSuite &data() const
             {
-                return _eah_suite;
+                return _ecdh_suite;
             }
 
             /** Access a single attainment matrix.
@@ -580,16 +580,16 @@ namespace ioh
              * third index: dimension id.
              * last index: run id.
              */
-            [[nodiscard]] const eah::AttainmentMatrix &at(size_t problem_id, size_t instance_id,
+            [[nodiscard]] const ecdh::AttainmentMatrix &at(size_t problem_id, size_t instance_id,
                                                           size_t dim_id, size_t runs) const
             {
-                assert(_eah_suite.count(problem_id) != 0);
-                assert(_eah_suite.at(problem_id).count(dim_id) != 0);
+                assert(_ecdh_suite.count(problem_id) != 0);
+                assert(_ecdh_suite.at(problem_id).count(dim_id) != 0);
                 assert(
-                    _eah_suite.at(problem_id).at(dim_id).count(instance_id) != 0);
+                    _ecdh_suite.at(problem_id).at(dim_id).count(instance_id) != 0);
                 assert(
-                    _eah_suite.at(problem_id).at(dim_id).at(instance_id).count(runs) != 0);
-                return _eah_suite.at(problem_id).at(dim_id).at(instance_id).at(runs);
+                    _ecdh_suite.at(problem_id).at(dim_id).at(instance_id).count(runs) != 0);
+                return _ecdh_suite.at(problem_id).at(dim_id).at(instance_id).at(runs);
             }
 
             /** Returns the size of the computed data, in its internal order.
@@ -604,22 +604,22 @@ namespace ioh
             std::tuple<size_t, size_t, size_t, size_t> size()
             {
                 return std::make_tuple(
-                    _eah_suite.size(), // problems
-                    _eah_suite.begin()->second.size(), // dimensions
-                    _eah_suite.begin()->second.begin()->second.size(),
+                    _ecdh_suite.size(), // problems
+                    _ecdh_suite.begin()->second.size(), // dimensions
+                    _ecdh_suite.begin()->second.begin()->second.size(),
                     // instances
-                    _eah_suite.begin()->second.begin()->second.begin()->second.size() // runs
+                    _ecdh_suite.begin()->second.begin()->second.begin()->second.size() // runs
                     );
             }
 
             /** Accessor to the range used for error targets in this logger instance. */
-            [[nodiscard]] eah::Scale<double> &error_range() const
+            [[nodiscard]] ecdh::Scale<double> &error_range() const
             {
                 return _range_error;
             }
 
             /** Accessor to the range used for evaluations targets in this logger instance. */
-            [[nodiscard]] eah::Scale<size_t> &eval_range() const
+            [[nodiscard]] ecdh::Scale<size_t> &eval_range() const
             {
                 return _range_evals;
             }
@@ -632,46 +632,46 @@ namespace ioh
             //! Clear all previously computed data structure.
             void clear()
             {
-                _eah_suite.clear();
+                _ecdh_suite.clear();
             }
 
             //! Create maps and matrix for this problem.
-            void init_eah(const Problem &cur)
+            void init_ecdh(const Problem &cur)
             {
-                if (_eah_suite.count(cur.pb) == 0)
+                if (_ecdh_suite.count(cur.pb) == 0)
                 {
-                    _eah_suite[cur.pb] = std::map<
-                        size_t, std::map<size_t, std::map<size_t, eah::AttainmentMatrix>>>();
+                    _ecdh_suite[cur.pb] = std::map<
+                        size_t, std::map<size_t, std::map<size_t, ecdh::AttainmentMatrix>>>();
                 }
-                if (_eah_suite[cur.pb].count(cur.dim) == 0)
+                if (_ecdh_suite[cur.pb].count(cur.dim) == 0)
                 {
-                    _eah_suite[cur.pb][cur.dim] = std::map<
-                        size_t, std::map<size_t, eah::AttainmentMatrix>>();
+                    _ecdh_suite[cur.pb][cur.dim] = std::map<
+                        size_t, std::map<size_t, ecdh::AttainmentMatrix>>();
                 }
-                if (_eah_suite[cur.pb][cur.dim].count(cur.ins) == 0)
+                if (_ecdh_suite[cur.pb][cur.dim].count(cur.ins) == 0)
                 {
-                    _eah_suite[cur.pb][cur.dim][cur.ins] = std::map<
-                        size_t, eah::AttainmentMatrix>();
+                    _ecdh_suite[cur.pb][cur.dim][cur.ins] = std::map<
+                        size_t, ecdh::AttainmentMatrix>();
                 }
-                _eah_suite[cur.pb][cur.dim][cur.ins][cur.run] = _empty;
+                _ecdh_suite[cur.pb][cur.dim][cur.ins][cur.run] = _empty;
 
                 assert(
-                    _eah_suite.at(cur.pb).at(cur.dim).at(cur.ins).at(cur.run).at(0).at(0)
+                    _ecdh_suite.at(cur.pb).at(cur.dim).at(cur.ins).at(cur.run).at(0).at(0)
                     == 0);
             }
 
             //! Returns the current attainment matrix.
-            eah::AttainmentMatrix &current_eah()
+            ecdh::AttainmentMatrix &current_ecdh()
             {
-                assert(_eah_suite.count(_current.pb) != 0);
-                assert(_eah_suite[_current.pb].count(_current.dim) != 0);
+                assert(_ecdh_suite.count(_current.pb) != 0);
+                assert(_ecdh_suite[_current.pb].count(_current.dim) != 0);
                 assert(
-                    _eah_suite[_current.pb][_current.dim].count(_current.ins)
+                    _ecdh_suite[_current.pb][_current.dim].count(_current.ins)
                     != 0);
                 assert(
-                    _eah_suite[_current.pb][_current.dim][_current.ins].count(_current.run)
+                    _ecdh_suite[_current.pb][_current.dim][_current.ins].count(_current.run)
                     != 0);
-                return _eah_suite[_current.pb][_current.dim][_current.ins][_current.run];
+                return _ecdh_suite[_current.pb][_current.dim][_current.ins][_current.run];
             }
 
             /** Fill up the upper/upper quadrant of the attainment matrix with ones.
@@ -680,7 +680,7 @@ namespace ioh
              */
             void fill_up(size_t i_error, size_t j_evals)
             {
-                auto &mat = current_eah();
+                auto &mat = current_ecdh();
                 const auto ibound = _range_error.size();
                 auto jbound = _range_evals.size();
 
@@ -737,28 +737,28 @@ namespace ioh
 
         private:
             //! Default range for errors is logarithmic.
-            eah::Log10Scale<double> _default_range_error;
+            ecdh::Log10Scale<double> _default_range_error;
 
             //! Default range for evaluations is logarithmic.
-            eah::Log10Scale<size_t> _default_range_evals;
+            ecdh::Log10Scale<size_t> _default_range_evals;
 
         protected:
             /** Internal members  @{ */
 
             //! Scale for the errors axis.
-            eah::Scale<double> &_range_error;
+            ecdh::Scale<double> &_range_error;
 
             //! Scale for the evaluations axis.
-            eah::Scale<size_t> &_range_evals;
+            ecdh::Scale<size_t> &_range_evals;
 
             //! Currently targeted problem metadata.
             Problem _current;
 
             //! An attainment matrix filled with zeros, copied for each new problem/instance/dim.
-            eah::AttainmentMatrix _empty;
+            ecdh::AttainmentMatrix _empty;
 
             //! The whole main data structure.
-            eah::AttainmentSuite _eah_suite;
+            ecdh::AttainmentSuite _ecdh_suite;
 
             /** Default trigger is on every improvement.
             *
@@ -776,14 +776,14 @@ namespace ioh
         };
 
 
-        namespace eah
+        namespace ecdh
         {
             /** An interface for classes that computes statistics
-             * over the AttainmentSuite computed by an eah::EAH logger.
+             * over the AttainmentSuite computed by an ecdh::ECDH logger.
              *
              * The template indicates the return type of the functor interface.
              * 
-             * @ingroup EAH_API
+             * @ingroup ECDH_API
              */
             template <class T>
             class Stat
@@ -793,10 +793,10 @@ namespace ioh
                 using Type = T;
 
                 /** Call interface. */
-                virtual T operator()(const EAH &logger) = 0;
+                virtual T operator()(const ECDH &logger) = 0;
             };
 
-            /** Various statistics which can be readily applied on the data gathered by a logger::EAH. */
+            /** Various statistics which can be readily applied on the data gathered by a logger::ECDH. */
             namespace stat
             {
                 /** Generic functor for accumulated statistics.
@@ -804,10 +804,10 @@ namespace ioh
                  * Most probably called from a function defaulting the basic operation, like stat::sum,
                  * or used in a function which compute something else.
                  * 
-                 * @ingroup EAH_API
+                 * @ingroup ECDH_API
                  */
                 template <class T, class BinaryOperation>
-                T accumulate(const EAH &logger, const T init, const BinaryOperation &op)
+                T accumulate(const ECDH &logger, const T init, const BinaryOperation &op)
                 {
                     const AttainmentSuite &attainment = logger.data();
                     assert(attainment.size() > 0);
@@ -846,12 +846,12 @@ namespace ioh
                  *
                  * @code
                         using namespace ioh::logger;
-                        size_t s = eah::stat::sum(logger);
+                        size_t s = ecdh::stat::sum(logger);
                  * @endcode
                  *
-                 * @ingroup EAH
+                 * @ingroup ECDH
                  */
-                inline size_t sum(const EAH &logger)
+                inline size_t sum(const ECDH &logger)
                 {
                     return accumulate<size_t>(logger, 0, std::plus<size_t>());
                 }
@@ -864,12 +864,12 @@ namespace ioh
                  *
                  * @code
                     using namespcae ioh::logger;
-                    eah::stat::Histogram h;
-                    eah::stat::Histogram::Mat a = h(logger);
+                    ecdh::stat::Histogram h;
+                    ecdh::stat::Histogram::Mat a = h(logger);
                     size_t n = h.nb_attainments();
                  * @endcode
                  *
-                 * @ingroup EAH
+                 * @ingroup ECDH
                  */
                 class Histogram : public Stat<std::vector<std::vector<size_t>>>
                 {
@@ -897,10 +897,10 @@ namespace ioh
 
                     /** Computes the histogram on the logger's data.
                      * 
-                     * @param logger The logger::EAH.
+                     * @param logger The logger::ECDH.
                      * @returns a (\<nb of targets buckets\> * \<nb of evaluations buckets\>) matrix of positive integers.
                      */
-                    Mat operator()(const EAH &logger) override
+                    Mat operator()(const ECDH &logger) override
                     {
                         const AttainmentSuite &attainment = logger.data();
                         assert(attainment.size() > 0);
@@ -981,12 +981,12 @@ namespace ioh
                  *       (normally a simple vector<vector<size_t>>).
                  * @code
                         using namespace ioh::logger;
-                        eah::stat::Histogram::Mat m = eah::stat::histogram(logger);
+                        ecdh::stat::Histogram::Mat m = ecdh::stat::histogram(logger);
                  * @endcode
                  *
-                 * @ingroup EAH
+                 * @ingroup ECDH
                  */
-                inline Histogram::Mat histogram(const EAH &logger)
+                inline Histogram::Mat histogram(const ECDH &logger)
                 {
                     Histogram h;
                     return h(logger);
@@ -1004,7 +1004,7 @@ namespace ioh
                     using Mat = std::vector<std::vector<double>>;
                 }
 
-                /** Computes the matrix that is joint empirical cumulative distribution function of all attainments in a logger.
+                /** Computes the matrix that is joint empirical cumulative distribution function of all fitness trajectories in a logger.
                  *  Across problems, dimensions and instances.
                  * 
                  * That is, a (\<nb of targets buckets\> * \<nb of evaluations buckets\>) matrix of probabilities.
@@ -1015,12 +1015,12 @@ namespace ioh
                  *       (normally a simple vector<vector<double>>).
                  * @code
                         using namespace ioh::logger;
-                        eah::stat::Distribution::Mat m = eah::stat::distribution(logger);
+                        ecdh::stat::Distribution::Mat m = ecdh::stat::distribution(logger);
                  * @endcode
                  *
-                 * @ingroup EAH
+                 * @ingroup ECDH
                  */
-                inline std::vector<std::vector<double>> distribution(const EAH &logger)
+                inline std::vector<std::vector<double>> distribution(const ECDH &logger)
                 {
                     Histogram histo;
                     Histogram::Mat h = histo(logger);
@@ -1057,15 +1057,15 @@ namespace ioh
                      * You most probably only need the simplified interface:
                      * @code
                             using namespace ioh::logger;
-                            EAH logger(0,1,2,3,4,5); // Whatever
+                            ECDH logger(0,1,2,3,4,5); // Whatever
                             // This is the definition of under_curve::volume, for instance:
-                            double v = eah::stat::under_curve::accumulate(logger, 0.0, std::plus<double>());
+                            double v = ecdh::stat::under_curve::accumulate(logger, 0.0, std::plus<double>());
                      * @endcode
                      *
-                     * @ingroup EAH_API
+                     * @ingroup ECDH_API
                      */
                     template <class BinaryOperation>
-                    double accumulate(const EAH &logger, double init, BinaryOperation op)
+                    double accumulate(const ECDH &logger, double init, BinaryOperation op)
                     {
                         const AttainmentSuite &attainment = logger.data();
                         assert(attainment.size() > 0);
@@ -1098,19 +1098,19 @@ namespace ioh
                         return res;
                     }
 
-                    /** Computes the normalized volume under the curve of the logger::EAH's data structure.
+                    /** Computes the normalized volume under the curve of the logger::ECDH's data structure.
                      *
                      * @code
                             using namespace iof::logger;
-                            double v = eah::stat::under_curve::volume(logger);
+                            double v = ecdh::stat::under_curve::volume(logger);
                      * @endcode
                      *
                      * @note This is just a proxy to the stat::under_curve::accumulate function,
                      *       which provides a more detailled interface.
                      *
-                     * @ingroup EAH
+                     * @ingroup ECDH
                      */
-                    inline double volume(const EAH &logger)
+                    inline double volume(const ECDH &logger)
                     {
                         return accumulate(logger, 0.0, std::plus<double>());
                     }
@@ -1122,7 +1122,7 @@ namespace ioh
              * 
              * Convenience function to print the 2D vector arrays outputed by histogram or distribution.
              * 
-             * Useful to rapidely check or debug the core data structure of the EAH logger.
+             * Useful to rapidely check or debug the core data structure of the ECDH logger.
              * 
              * By default, just display the colormap.
              * If ranges are passed, display axis legends with values.
@@ -1130,7 +1130,7 @@ namespace ioh
              * @note The y-axis lowver buckets values are printed as vertical numbers.
              *       The x-axis legend show both min and max of buckets.
              * 
-             * @ingroup EAH
+             * @ingroup ECDH
              * 
              * @param data A 2D vector array.
              * @param ranges The pair of Scale used for the computation of data. If given, will add axis legends.
@@ -1288,6 +1288,6 @@ namespace ioh
 
                 return out.str();
             }
-        } // eah
+        } // ecdh
     } // logger
 } // ioh
