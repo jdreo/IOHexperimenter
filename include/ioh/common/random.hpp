@@ -13,9 +13,23 @@
 #define IOH_RND_MOD_MULTIPLIER 2836 // NOLINT
 #define IOH_PI 3.14159265358979323846 // NOLINT
 
-
+/** Random utilities. */
 namespace ioh::common::random
 {
+    
+    //! Global random device
+    inline std::random_device rd;
+    
+    //! Global random generator
+    inline std::mt19937 gen(rd());
+
+    /**
+     * @brief Seed the random number generator device. This is a std::mt19937 rng
+     */
+    inline void seed(const size_t seed){
+        gen.seed(seed);
+    }
+    
     /**
      * \brief Linear congruential generator using a given seed. Used to generate uniform random numbers.
      * \param seed Random seed
@@ -44,8 +58,6 @@ namespace ioh::common::random
      */
     inline int integer(const int min = std::numeric_limits<int>::min(), const int max = std::numeric_limits<int>::max())
     {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
         std::uniform_int_distribution<int> d(min, max);
         return d(gen);
     }
@@ -58,8 +70,6 @@ namespace ioh::common::random
      */
     inline double real(const double min = 0.0, const double max = 1.0)
     {
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
         std::uniform_real_distribution<double> d(min, max);
         return d(gen);
     }
@@ -71,7 +81,7 @@ namespace ioh::common::random
      * \param max The maximum boundary
      * \return A vector of uniform random integers
      */
-    inline std::vector<int> integer(const unsigned int n, const int min = std::numeric_limits<int>::min(),
+    inline std::vector<int> integers(const unsigned int n, const int min = std::numeric_limits<int>::min(),
                                      const int max = std::numeric_limits<int>::max())
     {
         std::vector<int> x;

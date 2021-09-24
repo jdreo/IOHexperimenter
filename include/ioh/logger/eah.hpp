@@ -410,14 +410,28 @@ namespace ioh
             /** Keep essential metadata about the problem. */
             struct Problem
             {
-                // FIXME add the suite
+                //! Problem id
                 int pb{};
+                
+                //! Problem dim
                 int dim{};
+
+                //! Problem instance
                 int ins{};
+
+                //! run id
                 int run{};
+
+                //! has_opt?
                 bool has_opt{};
+
+                //! is tracked?
                 bool is_tracked{};
+
+                //! Optimum
                 double opt{};
+
+                //! Optimization type
                 common::OptimizationType max_min{};
             };
 
@@ -601,7 +615,7 @@ namespace ioh
              * third index: number of instances.
              * last index: number of runs.
              */
-            std::tuple<size_t, size_t, size_t, size_t> size()
+            std::tuple<size_t, size_t, size_t, size_t> size() const
             {
                 return std::make_tuple(
                     _eah_suite.size(), // problems
