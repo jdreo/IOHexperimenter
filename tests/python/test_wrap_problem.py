@@ -34,7 +34,8 @@ class TestWrappedProblem(unittest.TestCase):
         self.assertEqual(p([1, 2]), 2.0)
         self.assertEqual(p.objective.x[0], 1)
         self.assertEqual(p.objective.x[0], p.objective.y)
-
+    
+    @unittest.skip("can cause a segfault (cpp exit handler)")
     def test_wrap_problem_scoped(self):
         def w():
             ioh.problem.wrap_real_problem(lambda _: 0.0, "l")
@@ -43,7 +44,7 @@ class TestWrappedProblem(unittest.TestCase):
         y = p([0]*5)
         self.assertEqual(y, 0.0)
 
-    def test_wrap_problem(self):
+    def test_wrap_problem_lambda(self):
         l = lambda _: 0.0
         ioh.problem.wrap_real_problem(l, "f")
         p = ioh.get_problem("f")

@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.12) 
 
 project(ioh   
-    VERSION 0.0.0.1
+    VERSION 0.3.2.6
     LANGUAGES CXX  
 ) 
 set(CMAKE_CXX_STANDARD 17)
@@ -14,6 +14,7 @@ option(BUILD_PYTHON_PACKAGE "Whether to build Python package" OFF)
 option(BUILD_TESTS "Whether to build test cases with gtest" ON)
 option(BUILD_EXAMPLE "Whether to build Python package" ON)  
 option(BUILD_DOCS "Build docs" OFF) 
+option(BUILD_SERVER "Whether to build the objective function server" OFF)
 option(ENABLE_PYTHON_PROBLEMS "Enable the ability to call external Python modules as if they were an IOH problem" OFF)
 
 if(MSVC)
@@ -45,6 +46,7 @@ add_library(ioh INTERFACE)
 add_library(ioh::ioh ALIAS ioh)
 
 #Include external formatting lib
+include_directories(${EXTERNAL_DIR}/fmt/include/)
 add_subdirectory(${EXTERNAL_DIR}/fmt)
 target_link_libraries(ioh INTERFACE fmt::fmt-header-only)
 
@@ -64,7 +66,7 @@ target_include_directories(ioh
 INTERFACE
     # Interface paths are relative to the installation path, not the current directory.
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:include> 
 )
 
 target_compile_features(ioh
@@ -146,5 +148,9 @@ if(BUILD_PYTHON_PACKAGE)
     add_subdirectory(ioh)
 endif()
 
-
+if(BUILD_SERVER)
+    include_directories(${EXTERNAL_DIR}/cxxopts/include/)
+    include_directories(${EXTERNAL_DIR}/json/include/)
+    add_subdirectory(server)
+endif()
 
